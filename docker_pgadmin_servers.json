@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Docker Compose",
+      "Group": "Servers",
+      "Port": 5432,
+      "Username": "username",
+      "Host": "videostream_postgres",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "video_stream",
+      "PassFile": "/tmp/pgpassfile"
+    }
+  }
+}
