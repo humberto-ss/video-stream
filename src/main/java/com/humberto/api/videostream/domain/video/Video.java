@@ -2,33 +2,69 @@ package com.humberto.api.videostream.domain.video;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.*;
+
 
 @Entity(name = "VIDEO")
-@Table(name = "VIDEO")
-public record Video(
+@Table(name = "video")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(of = "id")
+public class Video{
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        Integer id,
+        private Integer id;
         @NotEmpty
-        String title,
+        private String title;
         @NotEmpty
-        String synopsis,
+        private String synopsis;
         @NotEmpty
-        String director,
+        private String director;
         @NotEmpty
-        String actors,
+        private String actors;
         @Enumerated(EnumType.STRING)
-        Genre genre,
+        private Genre genre;
         @Column(name = "RUNNING_TIME")
-        Integer runningTime,
+        private Integer runningTime;
 
-        String content,
-        Integer views,
+        private byte[] content;
+        private Integer views;
+        private boolean deleted;
         @Version
-        Integer version
+        private Integer version;
 
-) {
 
+        public Video(VideoCreateDTO videoCreateDTO){
+                this.title = videoCreateDTO.title();
+                this.synopsis = videoCreateDTO.synopsis();
+                this.director = videoCreateDTO.director();
+                this.actors = videoCreateDTO.actors();
+                this.genre = videoCreateDTO.genre();
+                this.runningTime = videoCreateDTO.runningTime();
+                this.deleted = false;
+                this.views = 0;
+        }
+
+        public void updateDetails(VideoUpdateDetailsDTO videoUpdateDetailsDTO) {
+                if(videoUpdateDetailsDTO.title()!=null){
+                        this.title = videoUpdateDetailsDTO.title();
+                }
+                if(videoUpdateDetailsDTO.synopsis() !=null){
+                        this.synopsis = videoUpdateDetailsDTO.synopsis();
+                }
+                if(videoUpdateDetailsDTO.director() !=null ){
+                        this.actors = videoUpdateDetailsDTO.actors();
+                }
+                if(videoUpdateDetailsDTO.genre()!=null){
+                        this.genre = videoUpdateDetailsDTO.genre();
+                }
+                if(videoUpdateDetailsDTO.runningTime() != null){
+                        this.runningTime = videoUpdateDetailsDTO.runningTime();
+                }
+        }
+        public void delete(){
+                this.setDeleted(true);
+        }
 }

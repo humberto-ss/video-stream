@@ -8,8 +8,9 @@ CREATE TABLE VIDEO (
                         YEAR_RELEASE INTEGER NOT NULL,
                         GENRE VARCHAR(100) NOT NULL,
                         RUNNING_TIME INTEGER NOT NULL,
-                        VIEWS INTEGER NOT NULL,
-                        CONTENT VARCHAR NOT NULL,
+                        VIEWS INTEGER DEFAULT 0,
+                        CONTENT BYTEA,
                         VERSION INTEGER NOT NULL,
+                        DELETED BOOLEAN,
                         PRIMARY KEY(ID)
 );
