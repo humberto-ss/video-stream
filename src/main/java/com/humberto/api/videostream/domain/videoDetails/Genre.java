@@ -1,4 +1,4 @@
-package com.humberto.api.videostream.domain.video;
+package com.humberto.api.videostream.domain.videoDetails;
 
 public enum Genre {
     FICTION,
