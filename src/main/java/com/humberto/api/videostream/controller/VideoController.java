@@ -1,7 +1,10 @@
 package com.humberto.api.videostream.controller;
 
-import com.humberto.api.videostream.domain.video.*;
+import com.humberto.api.videostream.domain.videoContent.VideoContent;
+import com.humberto.api.videostream.domain.videoDetails.*;
 
+import com.humberto.api.videostream.service.VideoContentService;
+import com.humberto.api.videostream.service.VideoDetailService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,63 +24,71 @@ import java.io.IOException;
 public class VideoController {
 
     @Autowired
-    private VideoRepository repository;
-
+    private VideoDetailService videoDetailService;
+    @Autowired
+    private VideoContentService videoContentService;
     @GetMapping("/director/{director}")
     public ResponseEntity<Page<VideoDetailsDTO>> getVideosByDirector(@PathVariable String director, @PageableDefault(size = 10, sort = {"title"}) Pageable page){
-        var pageVideos = repository.findAllByDirector(director, page).map(VideoDetailsDTO::new);
+        var pageVideos = videoDetailService.findAll(director, page);
         return ResponseEntity.ok(pageVideos);
     }
 
     @GetMapping
     public ResponseEntity<Page<VideoDetailsDTO>> list(@PageableDefault(size = 10, sort = {"title"}) Pageable page){
-       var pageList = repository.findAllByDeletedFalse(page).map(VideoDetailsDTO::new);
+       var pageList = videoDetailService.listActiveVideos(page);
         return ResponseEntity.ok(pageList);
-    }
-
-    @GetMapping("/load/{id}")
-    public ResponseEntity<VideoLoadDTO> loadVideo(@PathVariable Integer id){
-        var video = repository.findById(id);
-        return ResponseEntity.ok(new VideoLoadDTO(video.get()));
     }
     @GetMapping("/{id}")
     public ResponseEntity<VideoDetailsDTO> getVideo(@PathVariable Integer id){
-        var video = repository.findById(id);
+        var video = videoDetailService.findById(id);
         return ResponseEntity.ok(new VideoDetailsDTO(video.get()));
+    }
+
+    @PostMapping("/load/{id}")
+    public ResponseEntity<VideoLoadDTO> loadVideo(@PathVariable Integer id){
+        var videoLoadDTO = videoContentService.loadVideo(id);
+        return ResponseEntity.ok(videoLoadDTO);
+    }
+
+
+    @GetMapping("/play/{name}")
+    public ResponseEntity<?>playVideo(@PathVariable String name){
+        var videoContent =  videoContentService.retrieve(name);
+        if(videoContent!=null) {
+            return ResponseEntity.ok().contentType(MediaType.valueOf(videoContent.getContentType())).body(videoContent.getContent());
+        }else{
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping
     @Transactional
     public ResponseEntity<VideoUpdateDetailsDTO> updateVideoDetails(@RequestBody VideoUpdateDetailsDTO videoUpdateDetailsDTO){
-        var video = repository.getReferenceById(videoUpdateDetailsDTO.id());
-        video.updateDetails(videoUpdateDetailsDTO);
-        return ResponseEntity.ok(new VideoUpdateDetailsDTO(video));
+        var videoContent = videoContentService.getVideoByID(videoUpdateDetailsDTO.id());
+        var video = videoDetailService.update(videoUpdateDetailsDTO,videoContent);
+        return ResponseEntity.ok(video);
     }
 
-
     @PostMapping("details")
-    @Transactional
     public ResponseEntity addVideoDetails(@RequestBody @Valid VideoCreateDTO data, UriComponentsBuilder uriBuilder) {
-        var video = new Video(data);
-        repository.save(video);
+        var videoContent = videoContentService.getVideoByID(data.id());
+        var video = videoDetailService.addDetails(data,videoContent);
         var uri = uriBuilder.path("/api/video/{id}").buildAndExpand(video.getId()).toUri();
         return ResponseEntity.created(uri).body(new VideoCreateDTO(video));
     }
 
 
     @DeleteMapping("/{id}")
-    @Transactional
     public ResponseEntity delete(@PathVariable Integer id){
-        var video =  repository.getReferenceById(id);
-        video.delete();
+        var videoContent = videoContentService.getVideoByID(id);
+        videoDetailService.delete(videoContent);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/pushVideo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/push", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    public ResponseEntity<VideoLoadDTO> pushVideo(@RequestParam("file") MultipartFile file) throws IOException {
-       Video video = new Video();
-       video.setContent(file.getBytes());
+    public ResponseEntity<VideoLoadDTO> publishVideo(@RequestParam("file") MultipartFile file) throws IOException {
+        videoContentService.store(file);
        return ResponseEntity.ok().build();
     }
 
