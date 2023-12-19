@@ -1,14 +1,15 @@
-package com.humberto.api.videostream.domain.video;
+package com.humberto.api.videostream.domain.videoDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public record VideoCreateDTO(
-
-
+            @NotNull
+            Integer id,
             @NotEmpty
             String title,
             @NotEmpty
@@ -24,8 +25,9 @@ public record VideoCreateDTO(
             Integer runningTime
 
     ) {
-            public VideoCreateDTO(Video video){
+            public VideoCreateDTO(VideoDetails video){
                     this(
+                            video.getId(),
                             video.getTitle(),
                             video.getSynopsis(),
                             video.getDirector(),

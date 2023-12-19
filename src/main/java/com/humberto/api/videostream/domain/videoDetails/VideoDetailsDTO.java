@@ -1,4 +1,4 @@
-package com.humberto.api.videostream.domain.video;
+package com.humberto.api.videostream.domain.videoDetails;
 
 public record VideoDetailsDTO(
 
@@ -13,7 +13,7 @@ public record VideoDetailsDTO(
 
             Integer runningTime
 ) {
-        public VideoDetailsDTO(Video video){
+        public VideoDetailsDTO(VideoDetails video){
             this(video.getTitle(), video.getSynopsis(),video.getDirector(),video.getActors(), video.getGenre(), video.getRunningTime());
         }
 
