@@ -3,8 +3,6 @@ package com.humberto.api.videostream.controller;
 import com.humberto.api.videostream.domain.videoContent.VideoContent;
 import com.humberto.api.videostream.domain.videoContent.VideoContentRepository;
 import com.humberto.api.videostream.domain.videoDetails.*;
-import com.humberto.api.videostream.domain.videoRepository.VideoRepositoryTest;
-import com.humberto.api.videostream.service.VideoContentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
-public class VideoDetailsControllerTest {
+public class VideoControllerTest {
 
     @Container
     @ServiceConnection
