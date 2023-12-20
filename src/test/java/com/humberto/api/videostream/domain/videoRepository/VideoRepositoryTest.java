@@ -1,14 +1,18 @@
-package com.humberto.api.videostream.domain.videoDetails;
+package com.humberto.api.videostream.domain.videoRepository;
 
 import com.humberto.api.videostream.domain.videoContent.VideoContent;
 import com.humberto.api.videostream.domain.videoContent.VideoContentRepository;
+import com.humberto.api.videostream.domain.videoDetails.Genre;
+import com.humberto.api.videostream.domain.videoDetails.VideoDetailRepository;
+import com.humberto.api.videostream.domain.videoDetails.VideoDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class VideoDetailsTest {
+public class VideoRepositoryTest {
 
     @Container
     @ServiceConnection
@@ -29,11 +33,11 @@ public class VideoDetailsTest {
     @Autowired
     VideoContentRepository videoContentRepository;
 
-    @Autowired
-    JdbcConnectionDetails jdbcConnectionDetails;
+//    @Autowired
+//    JdbcConnectionDetails jdbcConnectionDetails;
 
     @BeforeEach
-    void setUp(){
+    public void setUp(){
 
         VideoDetails videoDetails = new VideoDetails
                 (1,
@@ -57,5 +61,20 @@ public class VideoDetailsTest {
         assertThat(postgres.isCreated()).isTrue();
         assertThat(postgres.isRunning()).isTrue();
     }
+    @Test
+    void shouldReturnVideosByDirector(){
+        Pageable pageable = PageRequest.of(0,10 );
+        var page  = videoDetailRepository.findAllByDirector("Tarantino",pageable);
+        assertThat(page.stream().findAny().isPresent()).isTrue();
+        assertThat(page.stream().anyMatch(p-> p.getDirector().equalsIgnoreCase("Tarantino"))).isTrue();
+    }
+    @Test
+    void shouldReturnVideosNotDeleted(){
+        Pageable pageable = PageRequest.of(0,10 );
+        var page  = videoDetailRepository.findAllByDeletedFalse(pageable);
+        assertThat(page.stream().findAny().isPresent()).isTrue();
+        assertThat(page.stream().noneMatch(VideoDetails::isDeleted)).isTrue();
+    }
+
 
 }
